@@ -1,0 +1,126 @@
+{
+  "name": "frequent_tomcat_thread_pauses",
+  "description": "Tomcat Thread Pauses is a type of incident that occurs when the Tomcat server experiences frequent pauses in its threads. This can cause delay in server response time and may lead to application downtime. This issue can be caused by a variety of factors such as incorrect configuration, excessive load on the server, or memory leaks in the application code. It is important to investigate and resolve this issue promptly to ensure smooth functioning of the application.",
+  "params": [
+    {
+      "name": "NEW_MEMORY_SIZE",
+      "value": ""
+    },
+    {
+      "name": "TOMCAT_LOG_FILE",
+      "value": ""
+    },
+    {
+      "name": "PATH_TO_TOMCAT_DIRECTORY",
+      "value": ""
+    },
+    {
+      "name": "TOMCAT_PROCESS_NAME",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Frequent Tomcat Thread Pauses\nTomcat Thread Pauses is a type of incident that occurs when the Tomcat server experiences frequent pauses in its threads. This can cause delay in server response time and may lead to application downtime. This issue can be caused by a variety of factors such as incorrect configuration, excessive load on the server, or memory leaks in the application code. It is important to investigate and resolve this issue promptly to ensure smooth functioning of the application."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Get the process ID of the Tomcat instance"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `TOMCAT_PID=$(pgrep -f ${TOMCAT_PROCESS_NAME})`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the CPU and memory usage of the Tomcat process"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `top -p $TOMCAT_PID`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if there are any errors or warnings in the Tomcat logs"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `tail -f ${TOMCAT_LOG_FILE}`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the status of the Tomcat threads"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `jstack $TOMCAT_PID`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the number of open file descriptors by the Tomcat process"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `lsof -p $TOMCAT_PID | wc -l`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the network connections of the Tomcat process"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `netstat -nap | grep $TOMCAT_PID`"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Increase the memory allocation of the JVM to ensure that there is enough memory available for the Tomcat server to run efficiently."
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_memory_allocation_adjustment($NEW_MEMORY_SIZE, $PATH_TO_TOMCAT_DIRECTORY)"
+    }
+  ]
+}
